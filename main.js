@@ -11,6 +11,7 @@ const URL_DARURAT = "https://bing.com";
 
 let mainWindow;
 let loginWindow;
+let isPromptOpen = false; // Penanda apakah dialog prompt sedang terbuka
 
 function createMainWindow(examUrl, exitPassword) {
     mainWindow = new BrowserWindow({
@@ -31,26 +32,31 @@ function createMainWindow(examUrl, exitPassword) {
         mainWindow.webContents.send('exam-data', { examUrl, exitPassword });
     });
 
+    // PERBAIKAN UTAMA ADA DI SINI
+    // Mencegat semua upaya untuk menutup jendela
+    mainWindow.on('close', (event) => {
+        // 1. Mencegah jendela agar tidak langsung tertutup
+        event.preventDefault(); 
+        
+        // 2. Kirim pesan ke renderer untuk menampilkan prompt password
+        //    Ini akan menangani Alt+F4, window.close(), dll.
+        if (mainWindow) {
+            mainWindow.webContents.send('trigger-exit-prompt');
+        }
+    });
+
     mainWindow.on('closed', () => { mainWindow = null; });
 
-    // PERBAIKAN: Paksa aplikasi untuk merebut kembali fokus saat ditinggalkan
     mainWindow.on('blur', () => {
-        if (mainWindow) {
+        if (mainWindow && !isPromptOpen) {
             mainWindow.focus();
         }
     });
 
-    // Kunci fokus agresif HANYA untuk Linux
-    //if (process.platform === 'linux') {
-    //    mainWindow.on('blur', () => {
-    //        if (mainWindow) {
-    //            mainWindow.focus();
-    //        }
-    //    });
-    //}
-
+    // Shortcut Alt+Tab tetap kita blokir
     globalShortcut.register('Alt+Tab', () => false);
-    //globalShortcut.register('Super', () => false);
+
+    // Kita tidak lagi mendaftarkan Alt+F4 di sini karena sudah ditangani oleh event 'close'
 }
 
 function createLoginWindow() {
@@ -66,10 +72,7 @@ function createLoginWindow() {
     loginWindow.loadFile('login.html');
     loginWindow.removeMenu();
     loginWindow.on('closed', () => {
-        // Jika jendela login ditutup & jendela utama tidak ada, maka tutup aplikasi
-        if (!mainWindow) {
-            app.quit();
-        }
+        if (!mainWindow) app.quit();
         loginWindow = null;
     });
 }
@@ -89,7 +92,6 @@ app.on('will-quit', () => {
     globalShortcut.unregisterAll();
 });
 
-// PERUBAHAN #1: Handler ini sekarang HANYA verifikasi dan mengembalikan data.
 ipcMain.handle('login-attempt', async (event, { sessionId, password }) => {
     if (!sessionId || !password) {
         return { success: false, message: 'Sesi ID dan Password wajib diisi.' };
@@ -98,7 +100,6 @@ ipcMain.handle('login-attempt', async (event, { sessionId, password }) => {
         const response = await axios.get(`${API_URL}?sesi=${sessionId}`);
         const data = response.data;
         if (data.status === 'success' && data.passMasuk == password) {
-            // JANGAN buat/tutup jendela di sini. Cukup kembalikan datanya.
             return { success: true, url: data.url, exitPass: data.passKeluar };
         }
         return { success: false, message: data.message || 'Password atau Sesi ID salah.' };
@@ -110,7 +111,6 @@ ipcMain.handle('login-attempt', async (event, { sessionId, password }) => {
     }
 });
 
-// PERUBAHAN #2: Handler BARU untuk manajemen jendela setelah login sukses.
 ipcMain.on('login-successful', (event, data) => {
     createMainWindow(data.url, data.exitPass);
     if (loginWindow) {
@@ -118,7 +118,15 @@ ipcMain.on('login-successful', (event, data) => {
     }
 });
 
-// Handler untuk prompt keluar (tetap sama)
-ipcMain.handle('show-exit-prompt', (event, options) => {
-    return prompt(options, BrowserWindow.fromWebContents(event.sender));
+// PERBAIKAN UTAMA: Gunakan 'async' dan 'await' agar benar-benar menunggu
+ipcMain.handle('show-exit-prompt', async (event, options) => {
+    isPromptOpen = true; // Set penanda
+    try {
+        const parentWindow = BrowserWindow.fromWebContents(event.sender);
+        // Tunggu (await) sampai pengguna selesai berinteraksi dengan prompt
+        const result = await prompt(options, parentWindow);
+        return result;
+    } finally {
+        isPromptOpen = false; // Kembalikan penanda setelah prompt benar-benar selesai
+    }
 });
