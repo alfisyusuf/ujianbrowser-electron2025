@@ -1,0 +1,30 @@
+{
+  "name": "UjianBrowser",
+  "version": "1.0.0",
+  "description": "Browser Ujian Kiosk Cross-Platform",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "author": "Alfi",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "axios": "^1.7.2",
+    "electron": "^31.0.1",
+    "electron-builder": "^24.13.3",
+    "electron-is-dev": "^3.0.1"
+  },
+  "build": {
+    "appId": "com.ujian.browser",
+    "productName": "Ujian Browser",
+    "mac": {
+      "category": "public.app-category.education",
+      "target": "dmg",
+      "icon": "assets/icon.icns"
+    }
+  },
+  "dependencies": {
+    "electron-prompt": "^1.7.0"
+  }
+}
