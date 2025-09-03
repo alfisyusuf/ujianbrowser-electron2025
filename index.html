@@ -16,6 +16,19 @@
         <button id="btnClose" title="Keluar Aplikasi"><i class="fas fa-times"></i></button>
     </div>
     <webview id="examWebview" src="about:blank"></webview>
+    
+    <div id="exitModalOverlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Konfirmasi Keluar</h3>
+            <p>Masukkan Password Keluar:</p>
+            <input type="password" id="exitPasswordInput">
+            <div class="modal-buttons">
+                <button id="btnCancelExit">Batal</button>
+                <button id="btnConfirmExit">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script src="renderer.js"></script>
 </body>
 </html>

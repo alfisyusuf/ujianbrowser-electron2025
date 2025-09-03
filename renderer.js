@@ -10,23 +10,15 @@ window.api.onExamData(data => {
 
 // --- PENDETEKSI KONEKSI GAGAL ---
 const networkErrorCodes = [
-    'ERR_INTERNET_DISCONNECTED',
-    'ERR_NAME_NOT_RESOLVED',
-    'ERR_CONNECTION_TIMED_OUT',
-    'ERR_CONNECTION_RESET',
-    'ERR_CONNECTION_REFUSED'
+    'ERR_INTERNET_DISCONNECTED', 'ERR_NAME_NOT_RESOLVED', 'ERR_CONNECTION_TIMED_OUT',
+    'ERR_CONNECTION_RESET', 'ERR_CONNECTION_REFUSED'
 ];
-
 webview.addEventListener('did-fail-load', (error) => {
     console.error('Gagal memuat halaman:', error);
-    // Cek jika error termasuk dalam daftar error jaringan
     if (networkErrorCodes.includes(error.code)) {
-        // Alihkan ke halaman offline kustom kita
         webview.src = './offline.html';
     }
 });
-// --- AKHIR DARI PENDETEKSI KONEKSI GAGAL ---
-
 
 // --- Tombol Navigasi & Zoom ---
 document.getElementById('btnHome').addEventListener('click', () => webview.src = examUrl);
@@ -37,29 +29,35 @@ document.getElementById('btnZoomOut').addEventListener('click', () => {
 });
 document.getElementById('btnResetZoom').addEventListener('click', () => webview.setZoomFactor(1.0));
 
-// --- Logika Keluar ---
-document.getElementById('btnClose').addEventListener('click', () => {
-    window.api.showExitPrompt({
-        title: 'Konfirmasi Keluar',
-        label: 'Masukkan Password Keluar:',
-        value: '',
-        inputAttrs: {
-            type: 'password'
-        },
-        type: 'input'
-    })
-    .then((inputPassword) => {
-        if (inputPassword === null) {
-            console.log('Proses keluar dibatalkan.');
-        } else if (inputPassword === exitPassword) {
-            window.close();
-        } else {
-            alert('Password Keluar salah!');
-        }
-    })
-    .catch(console.error);
+// --- Logika Keluar dengan Modal HTML ---
+const exitModal = document.getElementById('exitModalOverlay');
+const passwordInput = document.getElementById('exitPasswordInput');
+const btnConfirmExit = document.getElementById('btnConfirmExit');
+const btnCancelExit = document.getElementById('btnCancelExit');
+
+function showExitModal() {
+    exitModal.classList.remove('hidden');
+    passwordInput.focus();
+}
+
+function hideExitModal() {
+    passwordInput.value = '';
+    exitModal.classList.add('hidden');
+}
+
+btnConfirmExit.addEventListener('click', () => {
+    if (passwordInput.value === exitPassword) {
+        window.close(); // Perintah ini akan memicu event 'close' di main.js
+    } else {
+        alert('Password Keluar salah!');
+        hideExitModal();
+    }
 });
 
-window.api.onTriggerExit( () => {
-    document.getElementById('btnClose').click();
-});
+btnCancelExit.addEventListener('click', hideExitModal);
+
+// Panggil fungsi keluar saat tombol 'Keluar' di-klik
+document.getElementById('btnClose').addEventListener('click', showExitModal);
+
+// Panggil fungsi keluar yang sama saat Alt+F4 atau Command+Q ditekan
+window.api.onTriggerExit(showExitModal);

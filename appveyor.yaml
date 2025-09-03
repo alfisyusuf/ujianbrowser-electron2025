@@ -1,0 +1,31 @@
+# appveyor.yml
+
+# Gunakan virtual machine macOS terbaru yang tersedia di AppVeyor
+image: macOS-ventura
+
+# Tentukan versi Node.js LTS yang stabil untuk build
+stack: node 20
+
+# Atur cache untuk mempercepat proses build di kemudian hari
+# Ini akan menyimpan folder node_modules setelah instalasi pertama
+cache:
+  - node_modules
+
+# Perintah untuk menginstal semua dependensi yang tercatat di package.json
+install:
+  - npm install
+
+# Nonaktifkan proses build default dari AppVeyor, karena kita akan
+# menggunakan skrip kita sendiri dari package.json
+build: off
+
+# Perintah untuk menjalankan proses build aplikasi
+build_script:
+  # Menjalankan skrip "dist" yang ada di package.json Anda
+  - npm run dist
+
+# Definisikan file hasil build yang ingin disimpan dan bisa diunduh
+artifacts:
+  # Ambil semua file .dmg yang dihasilkan oleh electron-builder
+  # di dalam folder dist
+  - path: 'dist/*.dmg'

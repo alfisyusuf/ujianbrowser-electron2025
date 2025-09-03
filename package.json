@@ -23,8 +23,5 @@
       "target": "dmg",
       "icon": "assets/icon.icns"
     }
-  },
-  "dependencies": {
-    "electron-prompt": "^1.7.0"
   }
 }
