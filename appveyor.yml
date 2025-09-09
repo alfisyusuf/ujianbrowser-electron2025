@@ -1,7 +1,7 @@
 # appveyor.yml
 
-# Gunakan virtual machine Windows dengan Visual Studio 2022
-image: Visual Studio 2022
+# Gunakan virtual machine macOS terbaru yang tersedia di AppVeyor
+image: macOS-ventura
 
 # Tentukan versi Node.js LTS yang stabil
 stack: node 20
@@ -24,6 +24,6 @@ build_script:
 
 # Definisikan file hasil build (artefak) yang ingin disimpan dan bisa diunduh
 artifacts:
-  # Ambil file installer .exe yang dihasilkan oleh electron-builder di dalam folder dist
-  - path: 'dist/*.exe'
-    name: UjianBrowserInstaller
+  # Ambil semua file .dmg yang dihasilkan oleh electron-builder di dalam folder dist
+  - path: 'dist/*.dmg'
+    name: UjianBrowser-macOS

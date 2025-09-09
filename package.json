@@ -1,11 +1,11 @@
 {
   "name": "ujian-browser-kiosk",
   "version": "1.0.0",
-  "description": "Browser Ujian Kiosk untuk Windows",
+  "description": "Browser Ujian Kiosk untuk macOS",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win"
+    "dist": "electron-builder --mac"
   },
   "author": "Alfi",
   "license": "UNLICENSED",
@@ -22,16 +22,13 @@
     "appId": "com.ujianbrowser.app",
     "productName": "Ujian Browser",
     "publish": null,
-    "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico",
-      "requestedExecutionLevel": "requireAdministrator"
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": true,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
+    "mac": {
+      "target": "dmg",
+      "arch": "universal",
+      "category": "public.app-category.education",
+      "icon": "assets/icon.icns",
+      "minimumSystemVersion": "11.0.0",
+      "hardenedRuntime": false
     }
   }
 }
