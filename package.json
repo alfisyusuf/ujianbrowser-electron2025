@@ -1,29 +1,37 @@
 {
-  "name": "UjianBrowser",
+  "name": "ujian-browser-kiosk",
   "version": "1.0.0",
-  "description": "Browser Ujian Kiosk Cross-Platform",
+  "description": "Browser Ujian Kiosk untuk Windows",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder"
+    "dist": "electron-builder --win"
   },
   "author": "Alfi",
   "license": "UNLICENSED",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "electron-prompt": "^1.7.0"
+  },
   "devDependencies": {
     "electron": "^31.0.1",
     "electron-builder": "^24.13.3",
     "electron-is-dev": "^3.0.1"
   },
   "build": {
-    "appId": "com.ujian.browser",
+    "appId": "com.ujianbrowser.app",
     "productName": "Ujian Browser",
-    "mac": {
-      "category": "public.app-category.education",
-      "target": "dmg",
-      "icon": "assets/icon.icns"
+    "publish": null,
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
     }
-  },
-  "dependencies": {
-    "axios": "^1.11.0"
   }
 }
